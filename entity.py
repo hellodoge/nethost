@@ -1,9 +1,10 @@
 import config
-import requests
 import logging
+import requests
+import mimetypes
 
 from hashes       import Hash
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlencode
 
 
 class Entity:
@@ -68,8 +69,10 @@ class Entity:
 
         logging.info(f'Updating {self.__filename} ({self.__hash_sum} -> {hash_sum})')
 
-        update_url = self.__private_url
-        response = requests.put(update_url, text)
+        mime_type = mimetypes.guess_type(self.__filename)[0] or 'text/plain'
+        update_url = self.__private_url + '?' + urlencode({'mime': mime_type})
+        response = requests.put(update_url, data=text.encode('utf-8'),
+                                headers={'Content-type': f'{mime_type}; charset=utf-8'})
         response.raise_for_status()
 
         self.__hash_sum = hash_sum
