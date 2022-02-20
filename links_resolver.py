@@ -6,7 +6,7 @@ from typing      import Set, Dict
 from collections import defaultdict
 
 
-PATTERN = r'{{\ *([\w\._-]+)\ * }}'
+PATTERN = r'{{ *([/\w\._-]+) * }}'
 
 
 class LinksResolver:
