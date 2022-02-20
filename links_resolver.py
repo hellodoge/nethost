@@ -16,8 +16,14 @@ class LinksResolver:
         self.__filename = filename
         self.__dependency_to_matches: Dict[str, Set[str]] = defaultdict(set)
 
-        with open(filename, 'r') as f:
-            self.__text = f.read()
+        logging.debug(f"LinksResolver: reading {filename}")
+
+        try:
+            with open(filename, 'r') as f:
+                self.__text = f.read()
+        except UnicodeDecodeError:
+            logging.error("Nethost does not support non-utf-8 files, please host them elsewhere")
+            raise
 
         for pattern in PATTERNS:
             for match in re.finditer(pattern, self.__text):
