@@ -6,7 +6,7 @@ from typing      import Set, Dict
 from collections import defaultdict
 
 
-PATTERN = r'{{ *([/\w\._-]+) * }}'
+PATTERNS = [r'{{ *([/\w\._-]+) * }}', r'href\s*=\s*"([/\w\._-]+)"', r'src\s*=\s*"([/\w\._-]+)"']
 
 
 class LinksResolver:
@@ -19,16 +19,17 @@ class LinksResolver:
         with open(filename, 'r') as f:
             self.__text = f.read()
 
-        for match in re.finditer(PATTERN, self.__text):
-            dependency = match.group(1)
-            if not path.isabs(dependency):
-                dependency = path.join(path.dirname(filename), dependency)
+        for pattern in PATTERNS:
+            for match in re.finditer(pattern, self.__text):
+                dependency = match.group(1)
+                if not path.isabs(dependency):
+                    dependency = path.join(path.dirname(filename), dependency)
 
-            dependency = path.normpath(dependency)
+                dependency = path.normpath(dependency)
 
-            logging.debug(f'Found dependency: {filename} -> {dependency}')
+                logging.debug(f'Found dependency: {filename} -> {dependency}')
 
-            self.__dependency_to_matches[dependency].add(match.group(0))
+                self.__dependency_to_matches[dependency].add(match.group(0))
 
 
     def get_deps(self):
@@ -42,7 +43,10 @@ class LinksResolver:
 
 
     def get_text(self):
-        assert len(re.findall(PATTERN, self.__text)) == 0
+
+        for pattern in PATTERNS:
+            assert len(re.findall(pattern, self.__text)) == 0
+
         return self.__text
 
 
